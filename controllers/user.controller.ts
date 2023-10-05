@@ -6,6 +6,7 @@ import { CatchAsyncError } from "../middleware/catchAsyncErrors";
 import ErrorHandler from "../utils/errorHandler";
 import userModel, { IUser } from "../models/user.model";
 import path from "path";
+import sendMail from "../utils/sendMail";
 
 interface IregistrationBody {
   name: string;
@@ -42,6 +43,22 @@ export const registrationUser = CatchAsyncError(
         path.join(__dirname, "../mails/activation-mail.ejs"),
         data
       );
+      try {
+        await sendMail({
+          email: user.email,
+          subject: "Activate your account",
+          template: "activation-mail.ejs",
+          data,
+        });
+
+        res.status(201).json({
+          success: true,
+          message: `Please check your email: ${user.email} to activate your account`,
+          activationToken: activationToken.token,
+        });
+      } catch (error: any) {
+        return next(new ErrorHandler(error.message, 400));
+      }
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
     }
@@ -61,3 +78,44 @@ export const createActivationToken = (user: any): IActivationToken => {
   );
   return { token, activationCode };
 };
+
+interface IActivationRequest {
+  activation_token: string;
+  activate_code: string;
+}
+
+export const activateUser = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { activate_code, activation_token } =
+        req.body as IActivationRequest;
+
+      const newUser: { user: IUser; activationCode: string } = jwt.verify(
+        activation_token,
+        process.env.ACTIVATION_SECRET as string
+      ) as { user: IUser; activationCode: string };
+      console.log(newUser);
+
+      if (newUser.activationCode !== activate_code) {
+        return next(new ErrorHandler("Invalid activation code", 400));
+      }
+
+      const { name, email, password } = newUser.user;
+
+      const existUser = await userModel.findOne({ email });
+
+      if (existUser) {
+        return next(new ErrorHandler("Email already exist", 400));
+      }
+
+      const user = await userModel.create({ name, email, password });
+
+      res.status(201).json({
+        success: true,
+        user,
+      });
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
