@@ -38,11 +38,18 @@ export const registrationUser = CatchAsyncError(
 
       const activationToken = createActivationToken(user);
       const activationCode = activationToken.activationCode;
+
       const data = { user: { name: user.name }, activationCode };
+      console.log(activationCode);
       const html = await ejs.renderFile(
         path.join(__dirname, "../mails/activation-mail.ejs"),
         data
       );
+      // res.status(201).json({
+      //   message: "success",
+      //   data,
+      //   activationToken: activationToken.token,
+      // });
       try {
         await sendMail({
           email: user.email,
@@ -94,7 +101,6 @@ export const activateUser = CatchAsyncError(
         activation_token,
         process.env.ACTIVATION_SECRET as string
       ) as { user: IUser; activationCode: string };
-      console.log(newUser);
 
       if (newUser.activationCode !== activate_code) {
         return next(new ErrorHandler("Invalid activation code", 400));

@@ -1,7 +1,9 @@
-require("dotenv").config();
 import nodemailer, { Transporter } from "nodemailer";
 import path from "path";
 import ejs from "ejs";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 interface EmailOptions {
   email: string;
@@ -10,8 +12,8 @@ interface EmailOptions {
   data: { [key: string]: any };
 }
 
-const sendMail = async (options: EmailOptions): Promise<void> => {
-  const transporter: Transporter = nodemailer.createTransport({
+const createTransporter = (): Transporter => {
+  return nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || "587"),
     service: process.env.SMTP_SERVICE,
@@ -19,25 +21,40 @@ const sendMail = async (options: EmailOptions): Promise<void> => {
       user: process.env.SMTP_MAIL,
       pass: process.env.SMTP_PASSWORD,
     },
+    // Set rejectUnauthorized to false to accept self-signed certificates
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
+};
 
+const renderEmailTemplate = async (
+  template: string,
+  data: any
+): Promise<string> => {
+  const templatePath = path.join(__dirname, "../mails", template);
+  return ejs.renderFile(templatePath, data);
+};
+
+const sendMail = async (options: EmailOptions): Promise<void> => {
+  const transporter = createTransporter();
   const { email, subject, template, data } = options;
 
-  // get the path to the email template
-  const templatePath = path.join(__dirname, "../mails", template);
+  try {
+    const html = await renderEmailTemplate(template, data);
 
-  // Render the email tempalte with EJS
-  const html: string = await ejs.renderFile(templatePath, data);
+    const mailOptions = {
+      from: process.env.SMTP_MAIL,
+      to: email,
+      subject,
+      html,
+    };
 
-  // Send the email
-  const mailOptions = {
-    from: process.env.SMTP_MAIL,
-    to: email,
-    subject,
-    html,
-  };
-
-  await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error("Error sending email:", error);
+    throw error;
+  }
 };
 
 export default sendMail;
