@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ELearning Activation Email</title>
+    <style type="text/css">
+      body {
+        margin: 0;
+        padding: 0;
+        min-width: 100%;
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        background-color: #fafafa;
+        color: #222222;
+      }
+      a {
+        color: #000;
+        text-decoration: none;
+      }
+      h1 {
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1.25;
+        margin-top: 0;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+      p {
+        margin-top: 0;
+        margin-bottom: 24px;
+      }
+      table td {
+        vertical-align: top;
+      }
+      .email-wrapper {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .email-header {
+        background-color: #0070f3;
+        padding: 24px;
+        color: #ffffff;
+      }
+      .email-footer {
+        background-color: #f6f6f6;
+        padding: 24px;
+      }
+      .Button {
+        display: inline-block;
+        background-color: #0070f3;
+        color: #ffffff;
+        font-size: 16px;
+        font-weight: 700;
+        text-align: center;
+        text-decoration: none;
+        padding: 12px 24px;
+        border-radius: 4px;
+      }
+      .first-td {
+        font-weight: 600 !important;
+      }
+      .first-td {
+        text-transform: uppercase;
+        color: #0000006c;
+        font-size: 16px;
+        padding: 5px 0px;
+        width: 1%;
+      }
+      .second-td {
+        color: #000000af;
+        font-size: 15px;
+        font-weight: 500 !important;
+      }
+      td {
+        padding: 10px;
+        text-align: center;
+        width: 28.33%;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-wrapper">
+      <div class="email-header"><h1>Welcome to ELearning</h1></div>
+    </div>
+    <div class="email-body">
+      <p>Your ELearning order is confirmed</p>
+      <p>Here's what you ordered</p>
+      <table style="border-bottom: 1px solid #0000002f">
+        <tr>
+          <td>Order #:<%= order._id %></td>
+          <td>Order Date #:<%= order._date %></td>
+        </tr>
+      </table>
+      <table style="width: 90%; margin: auto; display: block">
+        <tr>
+          <td class="first-td">Item</td>
+          <td class="first-td">Qty</td>
+          <td class="first-td">Cost</td>
+        </tr>
+      </table>
+      <table style="width: 90%; margin: auto; display: block">
+        <tr>
+          <td class="second-td"><%= order._name %></td>
+          <td class="second-td">1</td>
+          <td class="second-td">$<%= order.price %></td>
+        </tr>
+      </table>
+      <p>
+        If you did not register for a TechConnect account, please ignore this
+        email.
+      </p>
+    </div>
+    <div class="email-footer">
+      <p>
+        If you have any questions, please dont hesitate to contact us at
+        <a href="#">mailto:support@techConnect.com</a>support@techConnect.com
+      </p>
+    </div>
+  </body>
+</html>
